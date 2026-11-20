@@ -5,6 +5,12 @@ from routers.llm import router as llm_router
 from fastapi import Depends, FastAPI
 from sqlmodel import Field, Session, SQLModel, create_engine, select, Relationship
 
+from routers.semantic_search import router as semantic_search_router
+
+from routers.rag import router as rag_router
+
+
+
 # 1. Define the Database Model (acts as both DB table & Pydantic schema)
 class Item(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -51,8 +57,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-app.include_router(llm_router)
 
+app.include_router(llm_router)
+app.include_router(semantic_search_router)
+app.include_router(rag_router)
 # 4. Dependency Injection for Database Sessions
 def get_session():
     with Session(engine) as session:

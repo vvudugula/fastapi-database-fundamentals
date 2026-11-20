@@ -85,3 +85,38 @@ async def generate(request: LLMRequest):
             status_code=504,
             detail="LLM generation timed out"
         )
+
+@router.post("/rag", response_model=LLMResponse)
+async def generate(request: LLMRequest):
+
+    try:
+        answer = await generate_response_java(
+            prompt=request.prompt,
+            temperature=request.temperature,
+            response_format=request.response_format
+        )
+
+        return LLMResponse(
+            prompt=request.prompt,
+            response=answer,
+            model=MODEL_NAME
+        )
+
+    except httpx.ConnectError:
+        raise HTTPException(
+            status_code=503,
+            detail="Ollama service is unavailable"
+        )
+
+    except httpx.HTTPStatusError:
+        raise HTTPException(
+            status_code=502,
+            detail="Ollama returned an unsuccessful response"
+        )
+
+    except httpx.TimeoutException:
+        raise HTTPException(
+            status_code=504,
+            detail="LLM generation timed out"
+        )
+
